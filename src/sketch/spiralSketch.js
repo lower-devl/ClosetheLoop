@@ -3,6 +3,7 @@ import { generateSpiralPoints } from '../utils/spiralMath.js'
 export function createSpiralSketch(getTasks, onCompleteTask) {
   return (p) => {
     let centerX, centerY
+    let wasMousePressed = false
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight - 60)
@@ -36,12 +37,13 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       }
       p.endShape()
 
-      drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask)
+      drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask, wasMousePressed)
+      wasMousePressed = p.mouseIsPressed
     }
   }
 }
 
-function drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask) {
+function drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask, wasMousePressed) {
   const openTasks = tasks.filter(t => !t.completedAt)
   
   for (const task of openTasks) {
@@ -64,7 +66,7 @@ function drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask) {
       p.textSize(12)
       p.text(task.text, x + 15, y + 4)
       
-      if (p.mouseIsPressed) {
+      if (p.mouseIsPressed && !wasMousePressed) {
         onCompleteTask(task.id)
       }
     }
