@@ -31,16 +31,23 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       const scale = Math.min(p.width, p.height) / 300
       
       p.stroke(0)
-      p.strokeWeight(2)
       p.noFill()
       
+      const totalPoints = distortedPoints.length
+      
       p.beginShape()
-      for (const point of distortedPoints) {
+      for (let i = 0; i < distortedPoints.length; i++) {
+        const point = distortedPoints[i]
         const x = centerX + point.x * scale
         const y = centerY + point.y * scale
         const jitterIntensity = 2
         const jitteredX = noiseHandler.applyJitter(x, jitterIntensity, point.x * 0.01)
         const jitteredY = noiseHandler.applyJitter(y, jitterIntensity, point.y * 0.01)
+        
+        const progress = i / totalPoints
+        const weight = 1 + (1 - progress) * 3
+        p.strokeWeight(weight)
+        
         p.vertex(jitteredX, jitteredY)
       }
       p.endShape()
@@ -61,6 +68,13 @@ function drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask, wasMou
     
     const d = p.dist(p.mouseX, p.mouseY, x, y)
     const isHovered = d < 15
+    
+    p.noStroke()
+    for (let i = 0; i < 3; i++) {
+      p.fill(0, 0, 0, 30 - i * 10)
+      const bleedSize = 12 + i * 4 + p.random(-2, 2)
+      p.circle(x + p.random(-1, 1), y + p.random(-1, 1), bleedSize)
+    }
     
     p.stroke(0)
     p.strokeWeight(isHovered ? 3 : 2)
