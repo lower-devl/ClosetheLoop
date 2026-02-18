@@ -78,32 +78,58 @@ function drawSpiral() {
 }
 
 function drawThorns() {
-    const tasks = window.taskManager ? window.taskManager.getOpenTasks() : [];
+    const allTasks = window.taskManager ? window.taskManager.getAllTasks() : [];
     
-    tasks.forEach(task => {
-        // Find point on spiral closest to task angle
+    allTasks.forEach(task => {
         const taskPoint = getPointAtAngle(task.angle);
         if (!taskPoint) return;
         
-        // Calculate jitter
-        const jitterIntensity = window.taskManager.getJitterIntensity(task);
-        const jitterX = perlin.noise(frameCount * 0.02, task.angle) * jitterIntensity * 5;
-        const jitterY = perlin.noise(task.angle, frameCount * 0.02) * jitterIntensity * 5;
-        
-        // Draw thorn
-        const thornLength = 20 + jitterIntensity * 5;
-        const endX = taskPoint.x + Math.cos(task.angle) * thornLength + jitterX;
-        const endY = taskPoint.y + Math.sin(task.angle) * thornLength + jitterY;
-        
-        stroke(0);
-        strokeWeight(2);
-        line(taskPoint.x, taskPoint.y, endX, endY);
-        
-        // Draw task dot
-        fill(0);
-        noStroke();
-        ellipse(taskPoint.x, taskPoint.y, 8, 8);
+        if (task.completedAt) {
+            // Draw completed task at center (migrating inward)
+            drawCompletedTask(task, taskPoint);
+        } else {
+            // Draw open task thorn
+            drawOpenTask(task, taskPoint);
+        }
     });
+}
+
+function drawOpenTask(task, point) {
+    const jitterIntensity = window.taskManager.getJitterIntensity(task);
+    const jitterX = perlin.noise(frameCount * 0.02, task.angle) * jitterIntensity * 5;
+    const jitterY = perlin.noise(task.angle, frameCount * 0.02) * jitterIntensity * 5;
+    
+    const thornLength = 20 + jitterIntensity * 5;
+    const endX = point.x + Math.cos(task.angle) * thornLength + jitterX;
+    const endY = point.y + Math.sin(task.angle) * thornLength + jitterY;
+    
+    stroke(0);
+    strokeWeight(2);
+    line(point.x, point.y, endX, endY);
+    
+    fill(0);
+    noStroke();
+    ellipse(point.x, point.y, 8, 8);
+}
+
+function drawCompletedTask(task, originalPoint) {
+    // Calculate inward migration based on time since completion
+    const timeSinceCompletion = (Date.now() - task.completedAt) / 1000;
+    const migrationProgress = Math.min(timeSinceCompletion / 2, 1); // 2 seconds to migrate
+    
+    // Interpolate between original position and center
+    const x = lerp(originalPoint.x, centerX, migrationProgress);
+    const y = lerp(originalPoint.y, centerY, migrationProgress);
+    
+    // Draw as part of core
+    const coreSize = 4 + migrationProgress * 4;
+    fill(0);
+    noStroke();
+    ellipse(x, y, coreSize, coreSize);
+}
+
+function lerp(start, end, t) {
+    return start + (end - start) * t;
 }
 
 function getPointAtAngle(angle) {
@@ -135,4 +161,28 @@ function setupInputHandler() {
             input.value = '';
         }
     });
+}
+
+function mousePressed() {
+    // Check if clicked on a task thorn
+    const tasks = window.taskManager.getOpenTasks();
+    
+    for (let task of tasks) {
+        const taskPoint = getPointAtAngle(task.angle);
+        if (!taskPoint) continue;
+        
+        // Check distance to thorn
+        const d = dist(mouseX, mouseY, taskPoint.x, taskPoint.y);
+        if (d < 20) {
+            // Complete the task
+            window.taskManager.completeTask(task.id);
+            return;
+        }
+    }
+}
+
+function dist(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    return Math.sqrt(dx * dx + dy * dy);
 }
