@@ -6,6 +6,9 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
   const animations = []
   let completingTask = null
   let slashProgress = 0
+  let morphProgress = 1
+  let currentPoints = []
+  let targetPoints = []
   
   const onCompleteTaskWithAnimation = (taskId) => {
     const task = getTasks().find(t => t.id === taskId)
@@ -19,6 +22,8 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
         () => {
           onCompleteTask(taskId)
           completingTask = null
+          morphProgress = 0
+          targetPoints = generateSpiralPoints(4, 100, 8, 0.12)
         }
       ))
     }
@@ -34,6 +39,8 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       centerX = p.width / 2
       centerY = p.height / 2
       noiseHandler = createNoiseHandler(p)
+      currentPoints = generateSpiralPoints(4, 100, 8, 0.12)
+      targetPoints = currentPoints
     }
 
     p.windowResized = () => {
@@ -46,9 +53,18 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       p.background(244, 241, 234)
       noiseHandler.incrementNoiseOffset(0.02)
       
+      if (morphProgress < 1) {
+        morphProgress += 0.02
+        const easedProgress = easeOutCubic(morphProgress)
+        
+        currentPoints = currentPoints.map((point, i) => ({
+          x: point.x + (targetPoints[i].x - point.x) * easedProgress,
+          y: point.y + (targetPoints[i].y - point.y) * easedProgress
+        }))
+      }
+      
       const tasks = getTasks()
-      const points = generateSpiralPoints(4, 100, 8, 0.12)
-      const distortedPoints = injectDistortion(points, tasks, calculateDistortion)
+      const distortedPoints = injectDistortion(currentPoints, tasks, calculateDistortion)
       
       const scale = Math.min(p.width, p.height) / 300
       
