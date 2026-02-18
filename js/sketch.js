@@ -21,6 +21,13 @@ function setup() {
     
     // Setup input handler
     setupInputHandler();
+    
+    // Initialize audio on first click anywhere
+    document.addEventListener('click', () => {
+        if (window.audioManager) {
+            window.audioManager.init();
+        }
+    }, { once: true });
 }
 
 function draw() {
@@ -158,6 +165,13 @@ function setupInputHandler() {
         if (e.key === 'Enter' && input.value.trim()) {
             window.taskManager.addTask(input.value);
             input.value = '';
+        }
+    });
+    
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            input.value = '';
+            input.blur();
         }
     });
 }
