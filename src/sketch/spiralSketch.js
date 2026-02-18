@@ -2,13 +2,14 @@ import { generateSpiralPoints, injectDistortion, calculateDistortion } from '../
 import { createNoiseHandler } from '../utils/noise.js'
 import { createAnimation, easeOutCubic } from '../utils/animations.js'
 
-export function createSpiralSketch(getTasks, onCompleteTask) {
+export function createSpiralSketch(getTasks, onCompleteTask, onDeleteTask) {
   const animations = []
   let completingTask = null
   let slashProgress = 0
   let morphProgress = 1
   let currentPoints = []
   let targetPoints = []
+  const onDeleteTaskRef = { current: onDeleteTask }
   
   const onCompleteTaskWithAnimation = (taskId) => {
     const task = getTasks().find(t => t.id === taskId)
@@ -41,6 +42,7 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       noiseHandler = createNoiseHandler(p)
       currentPoints = generateSpiralPoints(4, 100, 8, 0.12)
       targetPoints = currentPoints
+      p.canvas.addEventListener('contextmenu', (e) => e.preventDefault())
     }
 
     p.windowResized = () => {
@@ -90,7 +92,7 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       }
       p.endShape()
 
-      drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTaskWithAnimation, wasMousePressed)
+      drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTaskWithAnimation, onDeleteTaskRef.current, wasMousePressed)
       
       for (let i = animations.length - 1; i >= 0; i--) {
         if (!animations[i].update()) {
@@ -114,7 +116,7 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
   }
 }
 
-function drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask, wasMousePressed) {
+function drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask, onDeleteTask, wasMousePressed) {
   const openTasks = tasks.filter(t => !t.completedAt)
   
   for (const task of openTasks) {
@@ -143,6 +145,11 @@ function drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask, wasMou
       p.noStroke()
       p.textSize(12)
       p.text(task.text, x + 15, y + 4)
+      
+      if (p.mouseIsPressed && !wasMousePressed && p.mouseButton === p.RIGHT) {
+        onDeleteTask(task.id)
+        return
+      }
       
       if (p.mouseIsPressed && !wasMousePressed) {
         onCompleteTask(task.id)

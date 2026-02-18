@@ -6,7 +6,7 @@ import { playThrum } from './utils/audio.js'
 import './App.css'
 
 export function App() {
-  const { tasks, addTask, completeTask } = useTaskStore()
+  const { tasks, addTask, completeTask, deleteTask } = useTaskStore()
 
   const handleCompleteTask = (id) => {
     completeTask(id)
@@ -15,7 +15,7 @@ export function App() {
 
   return (
     <div className="app">
-      <SpiralCanvas tasks={tasks} onCompleteTask={handleCompleteTask} />
+      <SpiralCanvas tasks={tasks} onCompleteTask={handleCompleteTask} onDeleteTask={deleteTask} />
       <TaskInput onSubmit={addTask} />
     </div>
   )
