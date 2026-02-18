@@ -1,4 +1,4 @@
-import { generateSpiralPoints } from '../utils/spiralMath.js'
+import { generateSpiralPoints, injectDistortion, calculateDistortion } from '../utils/spiralMath.js'
 
 export function createSpiralSketch(getTasks, onCompleteTask) {
   return (p) => {
@@ -22,6 +22,7 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       
       const tasks = getTasks()
       const points = generateSpiralPoints(4, 100, 8, 0.12)
+      const distortedPoints = injectDistortion(points, tasks, calculateDistortion)
       
       const scale = Math.min(p.width, p.height) / 300
       
@@ -30,7 +31,7 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       p.noFill()
       
       p.beginShape()
-      for (const point of points) {
+      for (const point of distortedPoints) {
         const x = centerX + point.x * scale
         const y = centerY + point.y * scale
         p.vertex(x, y)
