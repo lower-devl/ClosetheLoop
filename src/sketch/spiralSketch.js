@@ -1,14 +1,17 @@
 import { generateSpiralPoints, injectDistortion, calculateDistortion } from '../utils/spiralMath.js'
+import { createNoiseHandler } from '../utils/noise.js'
 
 export function createSpiralSketch(getTasks, onCompleteTask) {
   return (p) => {
     let centerX, centerY
     let wasMousePressed = false
+    let noiseHandler
 
     p.setup = () => {
       p.createCanvas(p.windowWidth, p.windowHeight - 60)
       centerX = p.width / 2
       centerY = p.height / 2
+      noiseHandler = createNoiseHandler(p)
     }
 
     p.windowResized = () => {
@@ -19,6 +22,7 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
 
     p.draw = () => {
       p.background(244, 241, 234)
+      noiseHandler.incrementNoiseOffset(0.02)
       
       const tasks = getTasks()
       const points = generateSpiralPoints(4, 100, 8, 0.12)
@@ -34,7 +38,10 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       for (const point of distortedPoints) {
         const x = centerX + point.x * scale
         const y = centerY + point.y * scale
-        p.vertex(x, y)
+        const jitterIntensity = 2
+        const jitteredX = noiseHandler.applyJitter(x, jitterIntensity, point.x * 0.01)
+        const jitteredY = noiseHandler.applyJitter(y, jitterIntensity, point.y * 0.01)
+        p.vertex(jitteredX, jitteredY)
       }
       p.endShape()
 
