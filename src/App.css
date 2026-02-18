@@ -23,6 +23,11 @@ body {
 
 .spiral-canvas canvas {
   display: block;
+  cursor: crosshair;
+}
+
+.task-input input {
+  cursor: text;
 }
 
 .task-input {
