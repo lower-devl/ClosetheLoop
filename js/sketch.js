@@ -24,15 +24,14 @@ function setup() {
 }
 
 function draw() {
-    background(244, 241, 234); // #F4F1EA parchment
+    background(244, 241, 234);
     
-    // Calculate spiral points
+    // Update counter
+    const openTasks = window.taskManager ? window.taskManager.getOpenTasks().length : 0;
+    document.getElementById('open-count').textContent = openTasks;
+    
     calculateSpiral();
-    
-    // Draw the spiral
     drawSpiral();
-    
-    // Draw task thorns
     drawThorns();
 }
 
@@ -56,25 +55,25 @@ function calculateSpiral() {
 }
 
 function drawSpiral() {
-    stroke(0);
-    strokeWeight(2);
-    noFill();
-    
-    beginShape();
-    for (let i = 0; i < spiralPoints.length - 1; i++) {
-        const p1 = spiralPoints[i];
-        const p2 = spiralPoints[i + 1];
+    // Draw multiple passes for ink bleed effect
+    for (let pass = 0; pass < 3; pass++) {
+        const alpha = pass === 0 ? 255 : (pass === 1 ? 100 : 40);
+        const offset = pass === 0 ? 0 : (pass === 1 ? 1 : -1);
         
-        // Variable line weight based on velocity
-        const dx = p2.x - p1.x;
-        const dy = p2.y - p1.y;
-        const velocity = Math.sqrt(dx * dx + dy * dy);
-        const weight = map(velocity, 0, 50, 3, 1, true);
-        
-        strokeWeight(weight);
-        line(p1.x, p1.y, p2.x, p2.y);
+        for (let i = 0; i < spiralPoints.length - 1; i++) {
+            const p1 = spiralPoints[i];
+            const p2 = spiralPoints[i + 1];
+            
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const velocity = Math.sqrt(dx * dx + dy * dy);
+            const weight = map(velocity, 0, 50, 3, 1, true);
+            
+            stroke(0, alpha);
+            strokeWeight(weight + pass * 0.5);
+            line(p1.x + offset, p1.y + offset, p2.x + offset, p2.y + offset);
+        }
     }
-    endShape();
 }
 
 function drawThorns() {
