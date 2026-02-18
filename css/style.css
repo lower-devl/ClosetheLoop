@@ -1,0 +1,50 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #F4F1EA;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    position: relative;
+}
+
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+#ui {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+#task-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #000;
+    color: #000;
+    font-size: 18px;
+    padding: 10px;
+    width: 300px;
+    text-align: center;
+    outline: none;
+    font-family: 'Courier New', monospace;
+}
+
+#task-input::placeholder {
+    color: #666;
+}
+
+#task-input:focus {
+    border-bottom-color: #333;
+}
