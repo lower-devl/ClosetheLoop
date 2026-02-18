@@ -1,42 +1,66 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+body {
+  font-family: 'Courier New', monospace;
+  background: #F4F1EA;
+  overflow: hidden;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.spiral-canvas {
+  flex: 1;
 }
 
-.card {
-  padding: 2em;
+.spiral-canvas canvas {
+  display: block;
 }
 
-.read-the-docs {
-  color: #888;
+.task-input {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: #F4F1EA;
+  border-top: 2px solid #000;
+  display: flex;
+  gap: 8px;
+}
+
+.task-input input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 2px solid #000;
+  background: #F4F1EA;
+  outline: none;
+}
+
+.task-input input:focus {
+  background: #FFF;
+}
+
+.task-input button {
+  padding: 8px 16px;
+  font-size: 20px;
+  font-weight: bold;
+  border: 2px solid #000;
+  background: #000;
+  color: #F4F1EA;
+  cursor: pointer;
+}
+
+.task-input button:hover {
+  background: #333;
 }
