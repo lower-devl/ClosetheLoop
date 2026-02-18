@@ -1,7 +1,29 @@
 import { generateSpiralPoints, injectDistortion, calculateDistortion } from '../utils/spiralMath.js'
 import { createNoiseHandler } from '../utils/noise.js'
+import { createAnimation, easeOutCubic } from '../utils/animations.js'
 
 export function createSpiralSketch(getTasks, onCompleteTask) {
+  const animations = []
+  let completingTask = null
+  let slashProgress = 0
+  
+  const onCompleteTaskWithAnimation = (taskId) => {
+    const task = getTasks().find(t => t.id === taskId)
+    if (task) {
+      completingTask = { ...task }
+      slashProgress = 0
+      
+      animations.push(createAnimation(
+        400,
+        (progress) => { slashProgress = easeOutCubic(progress) },
+        () => {
+          onCompleteTask(taskId)
+          completingTask = null
+        }
+      ))
+    }
+  }
+  
   return (p) => {
     let centerX, centerY
     let wasMousePressed = false
@@ -52,7 +74,25 @@ export function createSpiralSketch(getTasks, onCompleteTask) {
       }
       p.endShape()
 
-      drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTask, wasMousePressed)
+      drawTaskNodes(p, tasks, centerX, centerY, scale, onCompleteTaskWithAnimation, wasMousePressed)
+      
+      for (let i = animations.length - 1; i >= 0; i--) {
+        if (!animations[i].update()) {
+          animations.splice(i, 1)
+        }
+      }
+      
+      if (completingTask) {
+        const r = 8 * Math.exp(0.12 * completingTask.angle) * scale
+        const x = centerX + r * Math.cos(completingTask.angle)
+        const y = centerY + r * Math.sin(completingTask.angle)
+        
+        p.stroke(200, 0, 0)
+        p.strokeWeight(3 * slashProgress)
+        const slashLen = 20 * slashProgress
+        p.line(x - slashLen, y - slashLen, x + slashLen, y + slashLen)
+      }
+      
       wasMousePressed = p.mouseIsPressed
     }
   }
